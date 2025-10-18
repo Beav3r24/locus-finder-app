@@ -1,12 +1,38 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Link } from 'react-router-dom';
+import { Play, User, Trophy } from 'lucide-react';
 
 const Index = () => {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
+    <div className="flex min-h-screen items-center justify-center bg-background p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center">
+          <div className="text-8xl mb-4">🐌</div>
+          <CardTitle className="text-4xl font-bold mb-2">Immortal Slug Chase</CardTitle>
+          <p className="text-muted-foreground">Run or be caught by the slug!</p>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <Link to="/game" className="block">
+            <Button className="w-full h-14 text-lg" size="lg">
+              <Play className="mr-2" />
+              Start Game
+            </Button>
+          </Link>
+          <Link to="/profile" className="block">
+            <Button variant="outline" className="w-full h-12" size="lg">
+              <User className="mr-2" />
+              Profile
+            </Button>
+          </Link>
+          <Link to="/stats" className="block">
+            <Button variant="outline" className="w-full h-12" size="lg">
+              <Trophy className="mr-2" />
+              Stats & Records
+            </Button>
+          </Link>
+        </CardContent>
+      </Card>
     </div>
   );
 };
