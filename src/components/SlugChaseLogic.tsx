@@ -12,6 +12,10 @@ interface SlugChaseLogicProps {
   onSlugSpeedUpdate: (speed: number) => void;
 }
 
+// Maximum realistic running speed: 8.5 m/s (~30.6 km/h)
+// This is faster than Olympic sprinters, so any higher speed indicates GPS drift
+const MAX_RUNNING_SPEED_MS = 8.5;
+
 const SlugChaseLogic = ({ 
   userPosition, 
   onCoinsEarned, 
@@ -73,7 +77,17 @@ const SlugChaseLogic = ({
     const distanceMovedKm = turf.distance(from, to, { units: 'kilometers' });
     const distanceMovedM = distanceMovedKm * 1000;
 
-    // Filter GPS drift - only count movement > 5 meters
+    // Calculate instantaneous speed to filter outliers
+    const instantaneousSpeedMS = distanceMovedM / timeDiff; // m/s
+
+    // Filter unrealistic speeds (GPS drift/jumps)
+    if (instantaneousSpeedMS > MAX_RUNNING_SPEED_MS) {
+      console.warn(`Filtered GPS drift: ${instantaneousSpeedMS.toFixed(1)} m/s exceeds max ${MAX_RUNNING_SPEED_MS} m/s`);
+      lastUpdateTime.current = now;
+      return;
+    }
+
+    // Filter small movements (stationary GPS drift)
     if (distanceMovedM < 5) {
       lastUpdateTime.current = now;
       return;
