@@ -29,8 +29,6 @@ const SlugChaseLogic = ({
   const lastUserPosition = useRef<[number, number] | null>(null);
   const lastUpdateTime = useRef<number>(Date.now());
   const coinTimerRef = useRef<number>(0);
-  const speedSegmentStartTimeRef = useRef<number>(Date.now());
-  const speedSegmentDistanceKmRef = useRef<number>(0);
 
   // Initialize slug position 200 meters away from user
   useEffect(() => {
@@ -59,7 +57,6 @@ const SlugChaseLogic = ({
     if (!lastUserPosition.current) {
       lastUserPosition.current = userPosition;
       lastUpdateTime.current = Date.now();
-      speedSegmentStartTimeRef.current = Date.now();
       return;
     }
 
@@ -75,28 +72,15 @@ const SlugChaseLogic = ({
 
     // Filter GPS drift - only count movement > 5 meters
     if (distanceMovedM < 5) {
+      setUserSpeed(0); // Consider as stationary
       lastUpdateTime.current = now;
       return;
     }
 
-    // Add to speed segment distance
-    speedSegmentDistanceKmRef.current += distanceMovedKm;
-
-    // Calculate speed every 5 seconds
-    const speedSegmentTimeSeconds = (now - speedSegmentStartTimeRef.current) / 1000;
-    if (speedSegmentTimeSeconds >= 5) {
-      const speedSegmentTimeHours = speedSegmentTimeSeconds / 3600;
-      
-      if (speedSegmentTimeHours > 0 && speedSegmentDistanceKmRef.current > 0) {
-        const speed = speedSegmentDistanceKmRef.current / speedSegmentTimeHours; // km/h
-        setUserSpeed(speed);
-        onPlayerSpeedUpdate(speed);
-      }
-      
-      // Reset speed segment timer and distance
-      speedSegmentStartTimeRef.current = now;
-      speedSegmentDistanceKmRef.current = 0;
-    }
+    // Calculate speed in km/h
+    const speed = (distanceMovedKm / timeDiff) * 3600;
+    setUserSpeed(speed);
+    onPlayerSpeedUpdate(speed);
 
     // Award coins for movement (1 coin per 10 meters)
     onDistanceUpdate(distanceMovedM);
