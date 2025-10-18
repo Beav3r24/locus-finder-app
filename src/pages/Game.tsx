@@ -161,22 +161,6 @@ const Game = () => {
       <div className="pt-16">
         <Map userPosition={userPosition} slugPosition={slugPosition} />
 
-        <div className="fixed top-20 right-4 z-10">
-          <Card className="p-2 text-xs space-y-1 min-w-[160px]">
-            <div className="flex justify-between gap-3">
-              <span className="text-muted-foreground">Distance:</span>
-              <span className="font-bold">{(dailyDistance / 1000).toFixed(2)}km</span>
-            </div>
-            <div className="flex justify-between gap-3">
-              <span className="text-muted-foreground">You:</span>
-              <span className="font-bold text-blue-500">{playerSpeed.toFixed(1)} km/h</span>
-            </div>
-            <div className="flex justify-between gap-3">
-              <span className="text-muted-foreground">Slug:</span>
-              <span className="font-bold text-red-500">{slugSpeed.toFixed(1)} km/h</span>
-            </div>
-          </Card>
-        </div>
         
         {/* Slug Chase Logic Component */}
         <SlugChaseLogic 
