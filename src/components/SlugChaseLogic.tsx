@@ -21,7 +21,7 @@ const SlugChaseLogic = ({
   const [slugPosition, setSlugPosition] = useState<[number, number] | null>(null);
   const [distanceFromSlug, setDistanceFromSlug] = useState<number>(0);
   const [userSpeed, setUserSpeed] = useState<number>(0); // km/h
-  const [slugSpeed, setSlugSpeed] = useState<number>(15); // km/h (faster for testing)
+  const [slugSpeed, setSlugSpeed] = useState<number>(4.5); // km/h minimum
   const lastUserPosition = useRef<[number, number] | null>(null);
   const lastUpdateTime = useRef<number>(Date.now());
   const coinTimerRef = useRef<number>(0);
@@ -30,10 +30,10 @@ const SlugChaseLogic = ({
   useEffect(() => {
     if (!userPosition || slugPosition) return;
     
-    // Spawn slug 30m away (roughly south-west) for testing
+    // Spawn slug 200m away in random direction
     const from = turf.point([userPosition[0], userPosition[1]]);
-    const bearing = 225; // South-west direction
-    const slugPoint = turf.destination(from, 0.03, bearing, { units: 'kilometers' });
+    const bearing = Math.random() * 360; // Random direction
+    const slugPoint = turf.destination(from, 0.2, bearing, { units: 'kilometers' });
     const initialSlugPos: [number, number] = [
       slugPoint.geometry.coordinates[0],
       slugPoint.geometry.coordinates[1]
@@ -91,9 +91,15 @@ const SlugChaseLogic = ({
     lastUpdateTime.current = now;
   }, [userPosition]);
 
-  // For demo: use constant slug speed regardless of user speed
+  // Dynamic slug speed based on user speed
   useEffect(() => {
-    setSlugSpeed(15);
+    if (userSpeed > 6) {
+      // If user is fast, slug speeds up to 75% of user speed
+      setSlugSpeed(userSpeed * 0.75);
+    } else {
+      // Minimum slug speed is 4.5 km/h
+      setSlugSpeed(4.5);
+    }
   }, [userSpeed]);
 
   // Move slug toward user based on calculated speed
