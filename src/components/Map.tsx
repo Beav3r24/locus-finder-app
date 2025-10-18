@@ -137,6 +137,10 @@ const RawGoogleMap = ({ apiKey, userPosition, slugPosition }: { apiKey: string; 
     slugMarkerRef.current = new window.google.maps.Marker({
       position: center,
       map: mapRef.current,
+      icon: {
+        path: 'M 0,0',
+        scale: 0,
+      },
       label: {
         text: '🐌',
         fontSize: '32px',
