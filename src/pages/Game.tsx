@@ -1,6 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import Map from '@/components/Map';
 import SlugChaseLogic from '@/components/SlugChaseLogic';
 import { Coins, Target, Trophy, Navigation } from 'lucide-react';
@@ -14,6 +22,7 @@ const Game = () => {
   const [locationError, setLocationError] = useState<string | null>(null);
   const [isTracking, setIsTracking] = useState(false);
   const [accuracy, setAccuracy] = useState<number | null>(null);
+  const [isGameOver, setIsGameOver] = useState(false);
   const watchIdRef = useRef<number | null>(null);
 
   // Start GPS tracking (works on phone browsers!)
@@ -146,6 +155,7 @@ const Game = () => {
           onCoinsEarned={(amount) => setCoins(prev => prev + amount)}
           onDistanceUpdate={(distance) => setDailyDistance(prev => prev + distance)}
           onSlugPositionUpdate={setSlugPosition}
+          onGameOver={() => setIsGameOver(true)}
         />
       </div>
 
@@ -157,6 +167,46 @@ const Game = () => {
           <Button className="flex-1" variant="outline">Stats</Button>
         </div>
       </div>
+
+      {/* Game Over Dialog */}
+      <Dialog open={isGameOver} onOpenChange={setIsGameOver}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-2xl text-center">💀 Game Over!</DialogTitle>
+            <DialogDescription className="text-center text-lg pt-4">
+              The slug caught you!
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col items-center gap-4 py-4">
+            <div className="text-4xl">🐌</div>
+            <div className="text-center space-y-2">
+              <p className="font-semibold">Final Stats:</p>
+              <div className="flex items-center justify-center gap-2">
+                <Coins className="w-4 h-4 text-yellow-500" />
+                <span>{coins} coins earned</span>
+              </div>
+              <div className="flex items-center justify-center gap-2">
+                <Target className="w-4 h-4 text-blue-500" />
+                <span>{(dailyDistance / 1000).toFixed(2)}km traveled</span>
+              </div>
+            </div>
+          </div>
+          <DialogFooter className="sm:justify-center">
+            <Button 
+              onClick={() => {
+                setIsGameOver(false);
+                setCoins(0);
+                setDailyDistance(0);
+                setSlugPosition(null);
+                window.location.reload();
+              }}
+              className="w-full"
+            >
+              Play Again
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

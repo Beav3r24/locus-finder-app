@@ -6,18 +6,20 @@ interface SlugChaseLogicProps {
   onCoinsEarned: (amount: number) => void;
   onDistanceUpdate: (distance: number) => void;
   onSlugPositionUpdate: (position: [number, number]) => void;
+  onGameOver: () => void;
 }
 
 const SlugChaseLogic = ({ 
   userPosition, 
   onCoinsEarned, 
   onDistanceUpdate,
-  onSlugPositionUpdate 
+  onSlugPositionUpdate,
+  onGameOver
 }: SlugChaseLogicProps) => {
   const [slugPosition, setSlugPosition] = useState<[number, number] | null>(null);
   const [distanceFromSlug, setDistanceFromSlug] = useState<number>(0);
   const [userSpeed, setUserSpeed] = useState<number>(0); // km/h
-  const [slugSpeed, setSlugSpeed] = useState<number>(5); // km/h (constant for demo)
+  const [slugSpeed, setSlugSpeed] = useState<number>(15); // km/h (faster for testing)
   const lastUserPosition = useRef<[number, number] | null>(null);
   const lastUpdateTime = useRef<number>(Date.now());
   const coinTimerRef = useRef<number>(0);
@@ -26,10 +28,10 @@ const SlugChaseLogic = ({
   useEffect(() => {
     if (!userPosition || slugPosition) return;
     
-    // Spawn slug 200m away (roughly south-west)
+    // Spawn slug 30m away (roughly south-west) for testing
     const from = turf.point([userPosition[0], userPosition[1]]);
     const bearing = 225; // South-west direction
-    const slugPoint = turf.destination(from, 0.5, bearing, { units: 'kilometers' });
+    const slugPoint = turf.destination(from, 0.03, bearing, { units: 'kilometers' });
     const initialSlugPos: [number, number] = [
       slugPoint.geometry.coordinates[0],
       slugPoint.geometry.coordinates[1]
@@ -89,7 +91,7 @@ const SlugChaseLogic = ({
 
   // For demo: use constant slug speed regardless of user speed
   useEffect(() => {
-    setSlugSpeed(5);
+    setSlugSpeed(15);
   }, [userSpeed]);
 
   // Move slug toward user based on calculated speed
@@ -106,6 +108,7 @@ const SlugChaseLogic = ({
       // Don't move slug if already caught user
       if (distance < 3) {
         console.log('🐌 The slug caught you! Distance:', distance.toFixed(2), 'm');
+        onGameOver();
         return;
       }
 
