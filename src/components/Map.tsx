@@ -55,6 +55,8 @@ const RawGoogleMap = ({ apiKey, userPosition, slugPosition, activityRoutes }: { 
   const polylinesRef = useRef<any[]>([]);
   const [loaded, setLoaded] = useState(false);
   const fittedRef = useRef(false);
+  const animationFrameRef = useRef<number | null>(null);
+  const targetPositionRef = useRef<{ lat: number; lng: number } | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -114,9 +116,49 @@ const RawGoogleMap = ({ apiKey, userPosition, slugPosition, activityRoutes }: { 
 
   useEffect(() => {
     if (!loaded || !mapRef.current || !markerRef.current || !userPosition) return;
-    const pos = { lat: userPosition[1], lng: userPosition[0] };
-    markerRef.current.setPosition(pos);
-    mapRef.current.panTo(pos);
+    
+    const targetPos = { lat: userPosition[1], lng: userPosition[0] };
+    targetPositionRef.current = targetPos;
+    
+    const currentPos = markerRef.current.getPosition();
+    if (!currentPos) {
+      markerRef.current.setPosition(targetPos);
+      mapRef.current.panTo(targetPos);
+      return;
+    }
+    
+    const startPos = { lat: currentPos.lat(), lng: currentPos.lng() };
+    const startTime = Date.now();
+    const duration = 500; // 500ms animation
+    
+    const animate = () => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      
+      // Easing function for smooth animation
+      const eased = 1 - Math.pow(1 - progress, 3);
+      
+      const currentLat = startPos.lat + (targetPos.lat - startPos.lat) * eased;
+      const currentLng = startPos.lng + (targetPos.lng - startPos.lng) * eased;
+      
+      markerRef.current.setPosition({ lat: currentLat, lng: currentLng });
+      mapRef.current.panTo({ lat: currentLat, lng: currentLng });
+      
+      if (progress < 1 && targetPositionRef.current === targetPos) {
+        animationFrameRef.current = requestAnimationFrame(animate);
+      }
+    };
+    
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+    }
+    animationFrameRef.current = requestAnimationFrame(animate);
+    
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
   }, [userPosition, loaded]);
 
   useEffect(() => {
