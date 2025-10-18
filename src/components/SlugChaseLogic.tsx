@@ -29,8 +29,8 @@ const SlugChaseLogic = ({
   const lastUserPosition = useRef<[number, number] | null>(null);
   const lastUpdateTime = useRef<number>(Date.now());
   const coinTimerRef = useRef<number>(0);
-  const segmentStartTimeRef = useRef<number>(Date.now());
-  const segmentDistanceKmRef = useRef<number>(0);
+  const speedSegmentStartTimeRef = useRef<number>(Date.now());
+  const speedSegmentDistanceKmRef = useRef<number>(0);
 
   // Initialize slug position 200 meters away from user
   useEffect(() => {
@@ -59,7 +59,7 @@ const SlugChaseLogic = ({
     if (!lastUserPosition.current) {
       lastUserPosition.current = userPosition;
       lastUpdateTime.current = Date.now();
-      segmentStartTimeRef.current = Date.now();
+      speedSegmentStartTimeRef.current = Date.now();
       return;
     }
 
@@ -79,8 +79,24 @@ const SlugChaseLogic = ({
       return;
     }
 
-    // Add to segment distance
-    segmentDistanceKmRef.current += distanceMovedKm;
+    // Add to speed segment distance
+    speedSegmentDistanceKmRef.current += distanceMovedKm;
+
+    // Calculate speed every 5 seconds
+    const speedSegmentTimeSeconds = (now - speedSegmentStartTimeRef.current) / 1000;
+    if (speedSegmentTimeSeconds >= 5) {
+      const speedSegmentTimeHours = speedSegmentTimeSeconds / 3600;
+      
+      if (speedSegmentTimeHours > 0 && speedSegmentDistanceKmRef.current > 0) {
+        const speed = speedSegmentDistanceKmRef.current / speedSegmentTimeHours; // km/h
+        setUserSpeed(speed);
+        onPlayerSpeedUpdate(speed);
+      }
+      
+      // Reset speed segment timer and distance
+      speedSegmentStartTimeRef.current = now;
+      speedSegmentDistanceKmRef.current = 0;
+    }
 
     // Award coins for movement (1 coin per 10 meters)
     onDistanceUpdate(distanceMovedM);
@@ -90,20 +106,6 @@ const SlugChaseLogic = ({
       const coinsToAward = Math.floor(coinTimerRef.current / 10);
       onCoinsEarned(coinsToAward);
       coinTimerRef.current = coinTimerRef.current % 10;
-      
-      // Reset speed calculation after every 10 meters
-      const segmentTimeSeconds = (now - segmentStartTimeRef.current) / 1000;
-      const segmentTimeHours = segmentTimeSeconds / 3600;
-      
-      if (segmentTimeHours > 0 && segmentDistanceKmRef.current > 0) {
-        const speed = segmentDistanceKmRef.current / segmentTimeHours; // km/h
-        setUserSpeed(speed);
-        onPlayerSpeedUpdate(speed);
-      }
-      
-      // Reset timer and distance for next segment
-      segmentStartTimeRef.current = now;
-      segmentDistanceKmRef.current = 0;
     }
 
     lastUserPosition.current = userPosition;
