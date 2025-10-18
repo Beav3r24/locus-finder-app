@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Input } from '@/components/ui/input';
-import { Card } from '@/components/ui/card';
+import { GOOGLE_MAPS_API_KEY } from '@/config/maps';
 
 interface MapProps {
   userPosition: [number, number] | null;
@@ -44,45 +43,7 @@ const loadGoogleMaps = (apiKey: string): Promise<void> => {
 };
 
 const Map = ({ userPosition, slugPosition }: MapProps) => {
-  const [apiKey, setApiKey] = useState('');
-  const [tokenSet, setTokenSet] = useState(false);
-
-  if (!tokenSet) {
-    return (
-      <div className="h-[calc(100vh-8rem)] flex items-center justify-center p-4">
-        <Card className="p-6 max-w-md w-full">
-          <h2 className="text-xl font-bold mb-4">Enter Google Maps API Key</h2>
-          <p className="text-sm text-muted-foreground mb-4">
-            Get your API key from{' '}
-            <a
-              href="https://console.cloud.google.com/google/maps-apis"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-primary underline"
-            >
-              Google Cloud Console
-            </a>
-          </p>
-          <Input
-            type="text"
-            placeholder="AIza..."
-            value={apiKey}
-            onChange={(e) => setApiKey(e.target.value)}
-            className="mb-4"
-          />
-          <button
-            onClick={() => setTokenSet(true)}
-            disabled={!apiKey}
-            className="w-full bg-primary text-primary-foreground px-4 py-2 rounded-md disabled:opacity-50"
-          >
-            Start Game
-          </button>
-        </Card>
-      </div>
-    );
-  }
-
-  return <RawGoogleMap apiKey={apiKey} userPosition={userPosition} slugPosition={slugPosition} />;
+  return <RawGoogleMap apiKey={GOOGLE_MAPS_API_KEY} userPosition={userPosition} slugPosition={slugPosition} />;
 };
 
 const RawGoogleMap = ({ apiKey, userPosition, slugPosition }: { apiKey: string; userPosition: [number, number] | null; slugPosition: [number, number] | null }) => {

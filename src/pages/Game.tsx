@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { HIGH_ACCURACY_OPTIONS } from '@/config/maps';
 import {
   Dialog,
   DialogContent,
@@ -53,11 +54,7 @@ const Game = () => {
         console.error('GPS error:', error);
         setLocationError(error.message);
       },
-      { 
-        enableHighAccuracy: true, 
-        timeout: 10000, 
-        maximumAge: 0 
-      }
+      HIGH_ACCURACY_OPTIONS
     );
 
     // Watch position for continuous tracking
@@ -71,11 +68,7 @@ const Game = () => {
         console.error('GPS error:', error);
         setLocationError(error.message);
       },
-      { 
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 0
-      }
+      HIGH_ACCURACY_OPTIONS
     );
   };
 
