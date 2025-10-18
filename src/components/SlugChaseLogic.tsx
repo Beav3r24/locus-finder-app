@@ -12,14 +12,6 @@ interface SlugChaseLogicProps {
   onSlugSpeedUpdate: (speed: number) => void;
 }
 
-// Maximum realistic running speed: 8.5 m/s (~30.6 km/h)
-// This is faster than Olympic sprinters, so any higher speed indicates GPS drift
-const MAX_RUNNING_SPEED_MS = 8.5;
-
-// Minimum speed to count as "moving" (0.28 m/s ≈ 1.0 km/h)
-// Below this threshold, time is not counted toward moving time
-const RESTING_SPEED_THRESHOLD_MPS = 0.28;
-
 const SlugChaseLogic = ({ 
   userPosition, 
   onCoinsEarned, 
@@ -37,9 +29,6 @@ const SlugChaseLogic = ({
   const lastUserPosition = useRef<[number, number] | null>(null);
   const lastUpdateTime = useRef<number>(Date.now());
   const coinTimerRef = useRef<number>(0);
-  const gameStartTimeRef = useRef<number>(Date.now());
-  const totalDistanceKmRef = useRef<number>(0);
-  const totalMovingTimeSecondsRef = useRef<number>(0);
 
   // Initialize slug position 200 meters away from user
   useEffect(() => {
@@ -68,52 +57,30 @@ const SlugChaseLogic = ({
     if (!lastUserPosition.current) {
       lastUserPosition.current = userPosition;
       lastUpdateTime.current = Date.now();
-      gameStartTimeRef.current = Date.now();
       return;
     }
 
     const now = Date.now();
     const timeDiff = (now - lastUpdateTime.current) / 1000; // seconds
 
-    if (timeDiff < 1) return; // Update every 1 second (1000ms smoothing)
+    if (timeDiff < 2) return; // Update every 2 seconds
 
     const from = turf.point([lastUserPosition.current[0], lastUserPosition.current[1]]);
     const to = turf.point([userPosition[0], userPosition[1]]);
     const distanceMovedKm = turf.distance(from, to, { units: 'kilometers' });
     const distanceMovedM = distanceMovedKm * 1000;
 
-    // Calculate instantaneous speed to filter outliers
-    const instantaneousSpeedMS = distanceMovedM / timeDiff; // m/s
-
-    // Filter unrealistic speeds (GPS drift/jumps)
-    if (instantaneousSpeedMS > MAX_RUNNING_SPEED_MS) {
-      console.warn(`Filtered GPS drift: ${instantaneousSpeedMS.toFixed(1)} m/s exceeds max ${MAX_RUNNING_SPEED_MS} m/s`);
-      lastUpdateTime.current = now;
-      return;
-    }
-
-    // Filter small movements (stationary GPS drift)
+    // Filter GPS drift - only count movement > 5 meters
     if (distanceMovedM < 5) {
+      setUserSpeed(0); // Consider as stationary
       lastUpdateTime.current = now;
       return;
     }
 
-    // Add to total distance
-    totalDistanceKmRef.current += distanceMovedKm;
-
-    // Only count this time interval as "moving time" if speed exceeds resting threshold
-    if (instantaneousSpeedMS > RESTING_SPEED_THRESHOLD_MPS) {
-      totalMovingTimeSecondsRef.current += timeDiff;
-    }
-
-    // Calculate speed using only moving time (excludes stationary periods)
-    const totalMovingTimeHours = totalMovingTimeSecondsRef.current / 3600;
-    
-    if (totalMovingTimeHours > 0) {
-      const avgSpeed = totalDistanceKmRef.current / totalMovingTimeHours; // km/h
-      setUserSpeed(avgSpeed);
-      onPlayerSpeedUpdate(avgSpeed);
-    }
+    // Calculate speed in km/h
+    const speed = (distanceMovedKm / timeDiff) * 3600;
+    setUserSpeed(speed);
+    onPlayerSpeedUpdate(speed);
 
     // Award coins for movement (1 coin per 10 meters)
     onDistanceUpdate(distanceMovedM);
