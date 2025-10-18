@@ -16,6 +16,10 @@ interface SlugChaseLogicProps {
 // This is faster than Olympic sprinters, so any higher speed indicates GPS drift
 const MAX_RUNNING_SPEED_MS = 8.5;
 
+// Minimum speed to count as "moving" (0.28 m/s ≈ 1.0 km/h)
+// Below this threshold, time is not counted toward moving time
+const RESTING_SPEED_THRESHOLD_MPS = 0.28;
+
 const SlugChaseLogic = ({ 
   userPosition, 
   onCoinsEarned, 
@@ -35,6 +39,7 @@ const SlugChaseLogic = ({
   const coinTimerRef = useRef<number>(0);
   const gameStartTimeRef = useRef<number>(Date.now());
   const totalDistanceKmRef = useRef<number>(0);
+  const totalMovingTimeSecondsRef = useRef<number>(0);
 
   // Initialize slug position 200 meters away from user
   useEffect(() => {
@@ -96,12 +101,16 @@ const SlugChaseLogic = ({
     // Add to total distance
     totalDistanceKmRef.current += distanceMovedKm;
 
-    // Calculate speed as total distance / total time since game start
-    const totalTimeSeconds = (now - gameStartTimeRef.current) / 1000;
-    const totalTimeHours = totalTimeSeconds / 3600;
+    // Only count this time interval as "moving time" if speed exceeds resting threshold
+    if (instantaneousSpeedMS > RESTING_SPEED_THRESHOLD_MPS) {
+      totalMovingTimeSecondsRef.current += timeDiff;
+    }
+
+    // Calculate speed using only moving time (excludes stationary periods)
+    const totalMovingTimeHours = totalMovingTimeSecondsRef.current / 3600;
     
-    if (totalTimeHours > 0) {
-      const avgSpeed = totalDistanceKmRef.current / totalTimeHours; // km/h
+    if (totalMovingTimeHours > 0) {
+      const avgSpeed = totalDistanceKmRef.current / totalMovingTimeHours; // km/h
       setUserSpeed(avgSpeed);
       onPlayerSpeedUpdate(avgSpeed);
     }
