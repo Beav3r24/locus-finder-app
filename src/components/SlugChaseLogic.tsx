@@ -82,9 +82,9 @@ const SlugChaseLogic = ({
     // Add to speed segment distance
     speedSegmentDistanceKmRef.current += distanceMovedKm;
 
-    // Calculate speed every 5 seconds
+    // Calculate speed every 2 seconds
     const speedSegmentTimeSeconds = (now - speedSegmentStartTimeRef.current) / 1000;
-    if (speedSegmentTimeSeconds >= 5) {
+    if (speedSegmentTimeSeconds >= 2) {
       const speedSegmentTimeHours = speedSegmentTimeSeconds / 3600;
       
       if (speedSegmentTimeHours > 0 && speedSegmentDistanceKmRef.current > 0) {
