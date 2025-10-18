@@ -23,7 +23,10 @@ const Game = () => {
   const [isTracking, setIsTracking] = useState(false);
   const [accuracy, setAccuracy] = useState<number | null>(null);
   const [isGameOver, setIsGameOver] = useState(false);
+  const [slugDistance, setSlugDistance] = useState<number>(0);
+  const [notifications, setNotifications] = useState<string[]>([]);
   const watchIdRef = useRef<number | null>(null);
+  const lastMilestoneRef = useRef<number>(0);
 
   // Start GPS tracking (works on phone browsers!)
   const startTracking = () => {
@@ -91,6 +94,48 @@ const Game = () => {
     };
   }, []);
 
+  // Add notifications based on milestones and slug distance
+  useEffect(() => {
+    // Coin milestones
+    if (coins > 0 && coins % 10 === 0 && coins !== lastMilestoneRef.current) {
+      addNotification(`🎉 ${coins} coins earned!`);
+      lastMilestoneRef.current = coins;
+    }
+  }, [coins]);
+
+  useEffect(() => {
+    // Distance milestones
+    const kmTraveled = Math.floor(dailyDistance / 1000);
+    if (kmTraveled > 0 && kmTraveled % 1 === 0 && kmTraveled !== lastMilestoneRef.current) {
+      addNotification(`🏃 ${kmTraveled}km traveled!`);
+      lastMilestoneRef.current = kmTraveled;
+    }
+  }, [dailyDistance]);
+
+  // Slug proximity notifications
+  useEffect(() => {
+    if (slugDistance < 10) {
+      addNotification("🐌 I'm right behind you! You can't escape!");
+    } else if (slugDistance < 20) {
+      addNotification("🐌 I can see you... Run faster, human!");
+    } else if (slugDistance < 40) {
+      addNotification("🐌 Getting closer... Move it!");
+    } else if (slugDistance < 60) {
+      addNotification("🐌 I'm coming for you...");
+    }
+  }, [slugDistance]);
+
+  const addNotification = (message: string) => {
+    setNotifications(prev => {
+      const newNotifications = [...prev, message].slice(-3); // Keep last 3
+      return newNotifications;
+    });
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+      setNotifications(prev => prev.slice(1));
+    }, 5000);
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Stats Header */}
@@ -156,15 +201,27 @@ const Game = () => {
           onDistanceUpdate={(distance) => setDailyDistance(prev => prev + distance)}
           onSlugPositionUpdate={setSlugPosition}
           onGameOver={() => setIsGameOver(true)}
+          onSlugDistanceUpdate={setSlugDistance}
         />
       </div>
 
-      {/* Bottom Controls */}
+      {/* Bottom Notifications */}
       <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t p-4">
-        <div className="container flex gap-2">
-          <Button className="flex-1" variant="outline">Profile</Button>
-          <Button className="flex-1" variant="outline">Skins</Button>
-          <Button className="flex-1" variant="outline">Stats</Button>
+        <div className="container space-y-2">
+          {notifications.length === 0 ? (
+            <Card className="p-3 text-center text-sm text-muted-foreground">
+              🐌 The slug is hunting you... Keep moving!
+            </Card>
+          ) : (
+            notifications.map((notification, index) => (
+              <Card 
+                key={index} 
+                className="p-3 text-sm font-medium animate-in slide-in-from-bottom-2"
+              >
+                {notification}
+              </Card>
+            ))
+          )}
         </div>
       </div>
 

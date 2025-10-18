@@ -7,6 +7,7 @@ interface SlugChaseLogicProps {
   onDistanceUpdate: (distance: number) => void;
   onSlugPositionUpdate: (position: [number, number]) => void;
   onGameOver: () => void;
+  onSlugDistanceUpdate: (distance: number) => void;
 }
 
 const SlugChaseLogic = ({ 
@@ -14,7 +15,8 @@ const SlugChaseLogic = ({
   onCoinsEarned, 
   onDistanceUpdate,
   onSlugPositionUpdate,
-  onGameOver
+  onGameOver,
+  onSlugDistanceUpdate
 }: SlugChaseLogicProps) => {
   const [slugPosition, setSlugPosition] = useState<[number, number] | null>(null);
   const [distanceFromSlug, setDistanceFromSlug] = useState<number>(0);
@@ -104,6 +106,7 @@ const SlugChaseLogic = ({
       const distance = turf.distance(from, to, { units: 'meters' });
       
       setDistanceFromSlug(distance);
+      onSlugDistanceUpdate(distance);
 
       // Don't move slug if already caught user
       if (distance < 3) {
