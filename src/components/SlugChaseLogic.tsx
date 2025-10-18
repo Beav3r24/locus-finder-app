@@ -82,13 +82,16 @@ const SlugChaseLogic = ({
     // Add to speed segment distance
     speedSegmentDistanceKmRef.current += distanceMovedKm;
 
-    // Calculate speed every 3 seconds
+    // Calculate speed every 5 seconds
     const speedSegmentTimeSeconds = (now - speedSegmentStartTimeRef.current) / 1000;
-    if (speedSegmentTimeSeconds >= 3) {
-      // Speed = distance (km) / time (hours) = km/h
-      const speed = (speedSegmentDistanceKmRef.current / 3) * 3600; // distance per 3 seconds to km/h
-      setUserSpeed(speed);
-      onPlayerSpeedUpdate(speed);
+    if (speedSegmentTimeSeconds >= 5) {
+      const speedSegmentTimeHours = speedSegmentTimeSeconds / 3600;
+      
+      if (speedSegmentTimeHours > 0 && speedSegmentDistanceKmRef.current > 0) {
+        const speed = speedSegmentDistanceKmRef.current / speedSegmentTimeHours; // km/h
+        setUserSpeed(speed);
+        onPlayerSpeedUpdate(speed);
+      }
       
       // Reset speed segment timer and distance
       speedSegmentStartTimeRef.current = now;
