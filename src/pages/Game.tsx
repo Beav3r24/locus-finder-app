@@ -27,6 +27,8 @@ const Game = () => {
   const [notifications, setNotifications] = useState<string[]>([]);
   const watchIdRef = useRef<number | null>(null);
   const lastMilestoneRef = useRef<number>(0);
+  const notified100m = useRef<boolean>(false);
+  const notified10m = useRef<boolean>(false);
 
   // Start GPS tracking (works on phone browsers!)
   const startTracking = () => {
@@ -112,16 +114,14 @@ const Game = () => {
     }
   }, [dailyDistance]);
 
-  // Slug proximity notifications
+  // Slug proximity notifications (one-time only at specific distances)
   useEffect(() => {
-    if (slugDistance < 10) {
-      addNotification("🐌 I'm right behind you! You can't escape!");
-    } else if (slugDistance < 20) {
-      addNotification("🐌 I can see you... Run faster, human!");
-    } else if (slugDistance < 40) {
-      addNotification("🐌 Getting closer... Move it!");
-    } else if (slugDistance < 60) {
-      addNotification("🐌 I'm coming for you...");
+    if (slugDistance > 0 && slugDistance <= 10 && !notified10m.current) {
+      addNotification("🚨 RUN FOREST RUN!");
+      notified10m.current = true;
+    } else if (slugDistance > 10 && slugDistance <= 100 && !notified100m.current) {
+      addNotification("⚠️ 100 meters! The slug is closing in!");
+      notified100m.current = true;
     }
   }, [slugDistance]);
 
@@ -205,23 +205,27 @@ const Game = () => {
         />
       </div>
 
-      {/* Bottom Notifications */}
+      {/* Bottom Distance Display & Notifications */}
       <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t p-4">
         <div className="container space-y-2">
-          {notifications.length === 0 ? (
-            <Card className="p-3 text-center text-sm text-muted-foreground">
-              🐌 The slug is hunting you... Keep moving!
-            </Card>
-          ) : (
-            notifications.map((notification, index) => (
-              <Card 
-                key={index} 
-                className="p-3 text-sm font-medium animate-in slide-in-from-bottom-2"
-              >
-                {notification}
-              </Card>
-            ))
-          )}
+          {/* Permanent Distance Display */}
+          <Card className="p-4 text-center relative">
+            <div className="text-2xl font-bold">
+              {slugDistance > 0 ? `${slugDistance.toFixed(1)}m` : '---'}
+            </div>
+            <div className="text-xs text-muted-foreground mt-1">
+              Distance to slug
+            </div>
+            
+            {/* Overlay Notifications */}
+            {notifications.length > 0 && (
+              <div className="absolute inset-0 bg-destructive/95 backdrop-blur-sm rounded-lg flex items-center justify-center animate-in fade-in zoom-in-95">
+                <div className="text-lg font-bold text-destructive-foreground px-4">
+                  {notifications[notifications.length - 1]}
+                </div>
+              </div>
+            )}
+          </Card>
         </div>
       </div>
 
