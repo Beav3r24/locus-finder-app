@@ -66,7 +66,7 @@ const SlugChaseLogic = ({
     const now = Date.now();
     const timeDiff = (now - lastUpdateTime.current) / 1000; // seconds
 
-    if (timeDiff < 2) return; // Update every 2 seconds
+    if (timeDiff < 1) return; // Update every 1 second (1000ms smoothing)
 
     const from = turf.point([lastUserPosition.current[0], lastUserPosition.current[1]]);
     const to = turf.point([userPosition[0], userPosition[1]]);
