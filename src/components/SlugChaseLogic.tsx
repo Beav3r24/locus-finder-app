@@ -29,7 +29,8 @@ const SlugChaseLogic = ({
   const lastUserPosition = useRef<[number, number] | null>(null);
   const lastUpdateTime = useRef<number>(Date.now());
   const coinTimerRef = useRef<number>(0);
-  const positionHistoryRef = useRef<Array<{ position: [number, number], timestamp: number }>>([]);
+  const gameStartTimeRef = useRef<number>(Date.now());
+  const totalDistanceKmRef = useRef<number>(0);
 
   // Initialize slug position 200 meters away from user
   useEffect(() => {
@@ -58,7 +59,7 @@ const SlugChaseLogic = ({
     if (!lastUserPosition.current) {
       lastUserPosition.current = userPosition;
       lastUpdateTime.current = Date.now();
-      positionHistoryRef.current = [{ position: userPosition, timestamp: Date.now() }];
+      gameStartTimeRef.current = Date.now();
       return;
     }
 
@@ -78,33 +79,17 @@ const SlugChaseLogic = ({
       return;
     }
 
-    // Add current position to history
-    positionHistoryRef.current.push({ position: userPosition, timestamp: now });
+    // Add to total distance
+    totalDistanceKmRef.current += distanceMovedKm;
 
-    // Remove entries older than 3000ms
-    const cutoffTime = now - 3000;
-    positionHistoryRef.current = positionHistoryRef.current.filter(
-      entry => entry.timestamp >= cutoffTime
-    );
-
-    // Calculate average speed over last 3000ms
-    if (positionHistoryRef.current.length >= 2) {
-      const oldestEntry = positionHistoryRef.current[0];
-      const newestEntry = positionHistoryRef.current[positionHistoryRef.current.length - 1];
-      
-      const fromPoint = turf.point([oldestEntry.position[0], oldestEntry.position[1]]);
-      const toPoint = turf.point([newestEntry.position[0], newestEntry.position[1]]);
-      const totalDistanceKm = turf.distance(fromPoint, toPoint, { units: 'kilometers' });
-      const totalTimeSeconds = (newestEntry.timestamp - oldestEntry.timestamp) / 1000;
-      
-      if (totalTimeSeconds > 0) {
-        const avgSpeed = (totalDistanceKm / totalTimeSeconds) * 3600; // km/h
-        setUserSpeed(avgSpeed);
-        onPlayerSpeedUpdate(avgSpeed);
-      }
-    } else {
-      setUserSpeed(0);
-      onPlayerSpeedUpdate(0);
+    // Calculate speed as total distance / total time since game start
+    const totalTimeSeconds = (now - gameStartTimeRef.current) / 1000;
+    const totalTimeHours = totalTimeSeconds / 3600;
+    
+    if (totalTimeHours > 0) {
+      const avgSpeed = totalDistanceKmRef.current / totalTimeHours; // km/h
+      setUserSpeed(avgSpeed);
+      onPlayerSpeedUpdate(avgSpeed);
     }
 
     // Award coins for movement (1 coin per 10 meters)

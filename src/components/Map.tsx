@@ -129,7 +129,7 @@ const RawGoogleMap = ({ apiKey, userPosition, slugPosition, activityRoutes }: { 
     
     const startPos = { lat: currentPos.lat(), lng: currentPos.lng() };
     const startTime = Date.now();
-    const duration = 1000; // 1000ms animation
+    const duration = 500; // 500ms animation
     
     const animate = () => {
       const elapsed = Date.now() - startTime;
