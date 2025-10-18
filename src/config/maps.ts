@@ -5,7 +5,7 @@
 // 3. For iOS: Add your app's bundle identifier
 // Learn more: https://developers.google.com/maps/api-security-best-practices
 
-export const GOOGLE_MAPS_API_KEY = 'YOUR_API_KEY_HERE';
+export const GOOGLE_MAPS_API_KEY = 'AIzaSyCCiPjnKVXqxGP82_2JLj7hVTFYX7ZGYnU';
 
 // High accuracy location options for precise tracking
 export const HIGH_ACCURACY_OPTIONS = {
