@@ -129,8 +129,12 @@ const Game = () => {
     if (dailyDistance >= dailyGoal && !isGameWon) {
       setIsGameWon(true);
       stopTracking();
+      toast.success('🎉 Goal Reached! You escaped the slug!', {
+        description: `You traveled ${(dailyDistance / 1000).toFixed(2)}km and earned ${coins} coins!`,
+        duration: 5000,
+      });
     }
-  }, [dailyDistance, dailyGoal, isGameWon]);
+  }, [dailyDistance, dailyGoal, isGameWon, coins]);
 
   const addNotification = (message: string) => {
     setNotifications(prev => {
