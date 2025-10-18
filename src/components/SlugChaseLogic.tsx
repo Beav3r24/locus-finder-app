@@ -8,6 +8,8 @@ interface SlugChaseLogicProps {
   onSlugPositionUpdate: (position: [number, number]) => void;
   onGameOver: () => void;
   onSlugDistanceUpdate: (distance: number) => void;
+  onPlayerSpeedUpdate: (speed: number) => void;
+  onSlugSpeedUpdate: (speed: number) => void;
 }
 
 const SlugChaseLogic = ({ 
@@ -16,12 +18,14 @@ const SlugChaseLogic = ({
   onDistanceUpdate,
   onSlugPositionUpdate,
   onGameOver,
-  onSlugDistanceUpdate
+  onSlugDistanceUpdate,
+  onPlayerSpeedUpdate,
+  onSlugSpeedUpdate
 }: SlugChaseLogicProps) => {
   const [slugPosition, setSlugPosition] = useState<[number, number] | null>(null);
   const [distanceFromSlug, setDistanceFromSlug] = useState<number>(0);
   const [userSpeed, setUserSpeed] = useState<number>(0); // km/h
-  const [slugSpeed, setSlugSpeed] = useState<number>(4.5); // km/h minimum
+  const [slugSpeed, setSlugSpeed] = useState<number>(45); // km/h minimum (10x for testing)
   const lastUserPosition = useRef<[number, number] | null>(null);
   const lastUpdateTime = useRef<number>(Date.now());
   const coinTimerRef = useRef<number>(0);
@@ -76,6 +80,7 @@ const SlugChaseLogic = ({
     // Calculate speed in km/h
     const speed = (distanceMovedKm / timeDiff) * 3600;
     setUserSpeed(speed);
+    onPlayerSpeedUpdate(speed);
 
     // Award coins for movement (1 coin per 10 meters)
     onDistanceUpdate(distanceMovedM);
@@ -91,15 +96,18 @@ const SlugChaseLogic = ({
     lastUpdateTime.current = now;
   }, [userPosition]);
 
-  // Dynamic slug speed based on user speed
+  // Dynamic slug speed based on user speed (10x for testing)
   useEffect(() => {
+    let newSpeed;
     if (userSpeed > 6) {
-      // If user is fast, slug speeds up to 75% of user speed
-      setSlugSpeed(userSpeed * 0.75);
+      // If user is fast, slug speeds up to 75% of user speed (10x)
+      newSpeed = userSpeed * 0.75 * 10;
     } else {
-      // Minimum slug speed is 4.5 km/h
-      setSlugSpeed(4.5);
+      // Minimum slug speed is 45 km/h (10x of 4.5)
+      newSpeed = 45;
     }
+    setSlugSpeed(newSpeed);
+    onSlugSpeedUpdate(newSpeed);
   }, [userSpeed]);
 
   // Move slug toward user based on calculated speed

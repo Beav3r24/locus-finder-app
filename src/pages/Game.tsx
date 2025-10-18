@@ -25,6 +25,8 @@ const Game = () => {
   const [isGameOver, setIsGameOver] = useState(false);
   const [slugDistance, setSlugDistance] = useState<number>(0);
   const [notifications, setNotifications] = useState<string[]>([]);
+  const [playerSpeed, setPlayerSpeed] = useState<number>(0);
+  const [slugSpeed, setSlugSpeed] = useState<number>(0);
   const watchIdRef = useRef<number | null>(null);
   const lastMilestoneRef = useRef<number>(0);
   const notified100m = useRef<boolean>(false);
@@ -161,36 +163,20 @@ const Game = () => {
 
         <div className="fixed top-20 left-4 right-4 z-10">
           <Card className="p-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Navigation className={`w-4 h-4 ${isTracking ? 'text-green-500 animate-pulse' : 'text-muted-foreground'}`} />
-                <span className="text-sm font-medium">
-                  {isTracking ? 'GPS Active' : 'GPS Inactive'}
-                </span>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Distance Ran:</span>
+                <span className="font-bold">{(dailyDistance / 1000).toFixed(2)} km</span>
               </div>
-              <Button 
-                onClick={isTracking ? stopTracking : startTracking} 
-                size="sm"
-                variant={isTracking ? 'destructive' : 'default'}
-              >
-                {isTracking ? 'Stop' : 'Start GPS'}
-              </Button>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Your Speed:</span>
+                <span className="font-bold text-blue-500">{playerSpeed.toFixed(1)} km/h</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Slug Speed:</span>
+                <span className="font-bold text-red-500">{slugSpeed.toFixed(1)} km/h</span>
+              </div>
             </div>
-            {locationError && (
-              <p className="text-sm text-destructive mt-2">⚠️ {locationError}</p>
-            )}
-            {!userPosition && isTracking && (
-              <p className="text-sm text-muted-foreground mt-2">📡 Acquiring GPS signal...</p>
-            )}
-            {userPosition && (
-              <div className="mt-2 text-xs text-muted-foreground">
-                <div>📍 {userPosition[1].toFixed(6)}, {userPosition[0].toFixed(6)}</div>
-                {accuracy && <div>🎯 Accuracy: ±{accuracy.toFixed(0)}m</div>}
-              </div>
-            )}
-            <p className="text-xs text-muted-foreground mt-2 pt-2 border-t">
-              💡 Tip: Open this on your phone's browser for best GPS accuracy
-            </p>
           </Card>
         </div>
         
@@ -202,6 +188,8 @@ const Game = () => {
           onSlugPositionUpdate={setSlugPosition}
           onGameOver={() => setIsGameOver(true)}
           onSlugDistanceUpdate={setSlugDistance}
+          onPlayerSpeedUpdate={setPlayerSpeed}
+          onSlugSpeedUpdate={setSlugSpeed}
         />
       </div>
 
