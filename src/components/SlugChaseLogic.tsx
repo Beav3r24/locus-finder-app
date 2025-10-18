@@ -29,8 +29,8 @@ const SlugChaseLogic = ({
   const lastUserPosition = useRef<[number, number] | null>(null);
   const lastUpdateTime = useRef<number>(Date.now());
   const coinTimerRef = useRef<number>(0);
-  const gameStartTimeRef = useRef<number>(Date.now());
-  const totalDistanceKmRef = useRef<number>(0);
+  const segmentStartTimeRef = useRef<number>(Date.now());
+  const segmentDistanceKmRef = useRef<number>(0);
 
   // Initialize slug position 200 meters away from user
   useEffect(() => {
@@ -59,7 +59,7 @@ const SlugChaseLogic = ({
     if (!lastUserPosition.current) {
       lastUserPosition.current = userPosition;
       lastUpdateTime.current = Date.now();
-      gameStartTimeRef.current = Date.now();
+      segmentStartTimeRef.current = Date.now();
       return;
     }
 
@@ -79,18 +79,8 @@ const SlugChaseLogic = ({
       return;
     }
 
-    // Add to total distance
-    totalDistanceKmRef.current += distanceMovedKm;
-
-    // Calculate speed as total distance / total time since game start
-    const totalTimeSeconds = (now - gameStartTimeRef.current) / 1000;
-    const totalTimeHours = totalTimeSeconds / 3600;
-    
-    if (totalTimeHours > 0) {
-      const avgSpeed = totalDistanceKmRef.current / totalTimeHours; // km/h
-      setUserSpeed(avgSpeed);
-      onPlayerSpeedUpdate(avgSpeed);
-    }
+    // Add to segment distance
+    segmentDistanceKmRef.current += distanceMovedKm;
 
     // Award coins for movement (1 coin per 10 meters)
     onDistanceUpdate(distanceMovedM);
@@ -100,6 +90,20 @@ const SlugChaseLogic = ({
       const coinsToAward = Math.floor(coinTimerRef.current / 10);
       onCoinsEarned(coinsToAward);
       coinTimerRef.current = coinTimerRef.current % 10;
+      
+      // Reset speed calculation after every 10 meters
+      const segmentTimeSeconds = (now - segmentStartTimeRef.current) / 1000;
+      const segmentTimeHours = segmentTimeSeconds / 3600;
+      
+      if (segmentTimeHours > 0 && segmentDistanceKmRef.current > 0) {
+        const speed = segmentDistanceKmRef.current / segmentTimeHours; // km/h
+        setUserSpeed(speed);
+        onPlayerSpeedUpdate(speed);
+      }
+      
+      // Reset timer and distance for next segment
+      segmentStartTimeRef.current = now;
+      segmentDistanceKmRef.current = 0;
     }
 
     lastUserPosition.current = userPosition;
