@@ -26,8 +26,7 @@ const SlugChaseLogic = ({
   const [distanceFromSlug, setDistanceFromSlug] = useState<number>(0);
   const [userSpeed, setUserSpeed] = useState<number>(0); // km/h
   const [slugSpeed, setSlugSpeed] = useState<number>(4.5); // km/h minimum
-  const lastUserPosition = useRef<[number, number] | null>(null);
-  const lastUpdateTime = useRef<number>(Date.now());
+  const positionHistoryRef = useRef<Array<{ pos: [number, number], time: number }>>([]);
   const coinTimerRef = useRef<number>(0);
 
   // Initialize slug position 200 meters away from user
@@ -46,54 +45,51 @@ const SlugChaseLogic = ({
     onSlugPositionUpdate(initialSlugPos);
   }, [userPosition]);
 
-  // Calculate user speed and track movement (filter GPS drift)
+  // Calculate user speed over last 1000ms and track movement
   useEffect(() => {
-    if (!userPosition) {
-      lastUserPosition.current = userPosition;
-      lastUpdateTime.current = Date.now();
-      return;
-    }
-
-    if (!lastUserPosition.current) {
-      lastUserPosition.current = userPosition;
-      lastUpdateTime.current = Date.now();
-      return;
-    }
+    if (!userPosition) return;
 
     const now = Date.now();
-    const timeDiff = (now - lastUpdateTime.current) / 1000; // seconds
-
-    if (timeDiff < 2) return; // Update every 2 seconds
-
-    const from = turf.point([lastUserPosition.current[0], lastUserPosition.current[1]]);
-    const to = turf.point([userPosition[0], userPosition[1]]);
-    const distanceMovedKm = turf.distance(from, to, { units: 'kilometers' });
-    const distanceMovedM = distanceMovedKm * 1000;
-
-    // Filter GPS drift - only count movement > 5 meters
-    if (distanceMovedM < 5) {
-      setUserSpeed(0); // Consider as stationary
-      lastUpdateTime.current = now;
-      return;
-    }
-
-    // Calculate speed in km/h
-    const speed = (distanceMovedKm / timeDiff) * 3600;
-    setUserSpeed(speed);
-    onPlayerSpeedUpdate(speed);
-
-    // Award coins for movement (1 coin per 10 meters)
-    onDistanceUpdate(distanceMovedM);
     
-    coinTimerRef.current += distanceMovedM;
-    if (coinTimerRef.current >= 10) {
-      const coinsToAward = Math.floor(coinTimerRef.current / 10);
-      onCoinsEarned(coinsToAward);
-      coinTimerRef.current = coinTimerRef.current % 10;
-    }
+    // Add current position to history
+    positionHistoryRef.current.push({ pos: userPosition, time: now });
+    
+    // Remove positions older than 1000ms
+    positionHistoryRef.current = positionHistoryRef.current.filter(
+      entry => now - entry.time <= 1000
+    );
 
-    lastUserPosition.current = userPosition;
-    lastUpdateTime.current = now;
+    // Calculate speed over last 1000ms
+    if (positionHistoryRef.current.length >= 2) {
+      const oldest = positionHistoryRef.current[0];
+      const newest = positionHistoryRef.current[positionHistoryRef.current.length - 1];
+      
+      const from = turf.point([oldest.pos[0], oldest.pos[1]]);
+      const to = turf.point([newest.pos[0], newest.pos[1]]);
+      const distanceKm = turf.distance(from, to, { units: 'kilometers' });
+      const distanceM = distanceKm * 1000;
+      const timeDiffSeconds = (newest.time - oldest.time) / 1000;
+      
+      // Filter GPS drift - only count if moved > 5 meters
+      if (distanceM < 5 || timeDiffSeconds < 0.5) {
+        setUserSpeed(0);
+        onPlayerSpeedUpdate(0);
+      } else {
+        const speed = (distanceKm / timeDiffSeconds) * 3600;
+        setUserSpeed(speed);
+        onPlayerSpeedUpdate(speed);
+        
+        // Award coins for movement (1 coin per 10 meters)
+        onDistanceUpdate(distanceM);
+        
+        coinTimerRef.current += distanceM;
+        if (coinTimerRef.current >= 10) {
+          const coinsToAward = Math.floor(coinTimerRef.current / 10);
+          onCoinsEarned(coinsToAward);
+          coinTimerRef.current = coinTimerRef.current % 10;
+        }
+      }
+    }
   }, [userPosition]);
 
   // Dynamic slug speed based on user speed
