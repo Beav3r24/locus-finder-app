@@ -26,6 +26,7 @@ const Game = () => {
   const [isTracking, setIsTracking] = useState(false);
   const [accuracy, setAccuracy] = useState<number | null>(null);
   const [isGameOver, setIsGameOver] = useState(false);
+  const [isGameWon, setIsGameWon] = useState(false);
   const [slugDistance, setSlugDistance] = useState<number>(0);
   const [notifications, setNotifications] = useState<string[]>([]);
   const [playerSpeed, setPlayerSpeed] = useState<number>(0);
@@ -122,6 +123,14 @@ const Game = () => {
       notified100m.current = true;
     }
   }, [slugDistance]);
+
+  // Check for game won condition
+  useEffect(() => {
+    if (dailyDistance >= dailyGoal && !isGameWon) {
+      setIsGameWon(true);
+      stopTracking();
+    }
+  }, [dailyDistance, dailyGoal, isGameWon]);
 
   const addNotification = (message: string) => {
     setNotifications(prev => {
@@ -250,6 +259,54 @@ const Game = () => {
             <Button 
               onClick={() => {
                 setIsGameOver(false);
+                setCoins(0);
+                setDailyDistance(0);
+                setSlugPosition(null);
+                gameStartTimeRef.current = new Date();
+                window.location.reload();
+              }}
+              className="flex-1"
+            >
+              Play Again
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Game Won Dialog */}
+      <Dialog open={isGameWon} onOpenChange={setIsGameWon}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-2xl text-center">🎉 You Won!</DialogTitle>
+            <DialogDescription className="text-center text-lg pt-4">
+              You reached your goal and escaped the slug!
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col items-center gap-4 py-4">
+            <div className="text-4xl">🏆</div>
+            <div className="text-center space-y-2">
+              <p className="font-semibold">Final Stats:</p>
+              <div className="flex items-center justify-center gap-2">
+                <Coins className="w-4 h-4 text-yellow-500" />
+                <span>{coins} coins earned</span>
+              </div>
+              <div className="flex items-center justify-center gap-2">
+                <Target className="w-4 h-4 text-blue-500" />
+                <span>{(dailyDistance / 1000).toFixed(2)}km traveled</span>
+              </div>
+            </div>
+          </div>
+          <DialogFooter className="sm:justify-center gap-2">
+            <Button 
+              onClick={uploadToStrava}
+              variant="secondary"
+              className="flex-1"
+            >
+              Upload to Strava
+            </Button>
+            <Button 
+              onClick={() => {
+                setIsGameWon(false);
                 setCoins(0);
                 setDailyDistance(0);
                 setSlugPosition(null);
