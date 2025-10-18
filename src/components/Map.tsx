@@ -4,6 +4,7 @@ import { GOOGLE_MAPS_API_KEY } from '@/config/maps';
 interface MapProps {
   userPosition: [number, number] | null;
   slugPosition: [number, number] | null;
+  activityRoutes?: Array<[number, number][]>;
 }
 
 // Provide minimal typings for the global Google object to avoid TS errors
@@ -42,15 +43,16 @@ const loadGoogleMaps = (apiKey: string): Promise<void> => {
   return window._gmaps_loading_promise;
 };
 
-const Map = ({ userPosition, slugPosition }: MapProps) => {
-  return <RawGoogleMap apiKey={GOOGLE_MAPS_API_KEY} userPosition={userPosition} slugPosition={slugPosition} />;
+const Map = ({ userPosition, slugPosition, activityRoutes }: MapProps) => {
+  return <RawGoogleMap apiKey={GOOGLE_MAPS_API_KEY} userPosition={userPosition} slugPosition={slugPosition} activityRoutes={activityRoutes} />;
 };
 
-const RawGoogleMap = ({ apiKey, userPosition, slugPosition }: { apiKey: string; userPosition: [number, number] | null; slugPosition: [number, number] | null }) => {
+const RawGoogleMap = ({ apiKey, userPosition, slugPosition, activityRoutes }: { apiKey: string; userPosition: [number, number] | null; slugPosition: [number, number] | null; activityRoutes?: Array<[number, number][]> }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
   const markerRef = useRef<any>(null);
   const slugMarkerRef = useRef<any>(null);
+  const polylinesRef = useRef<any[]>([]);
   const [loaded, setLoaded] = useState(false);
   const fittedRef = useRef(false);
 
@@ -122,6 +124,43 @@ const RawGoogleMap = ({ apiKey, userPosition, slugPosition }: { apiKey: string; 
     const pos = { lat: slugPosition[1], lng: slugPosition[0] };
     slugMarkerRef.current.setPosition(pos);
   }, [slugPosition, loaded]);
+
+  // Draw activity routes as polylines
+  useEffect(() => {
+    if (!loaded || !mapRef.current || !activityRoutes) return;
+    
+    // Clear existing polylines
+    polylinesRef.current.forEach(polyline => polyline.setMap(null));
+    polylinesRef.current = [];
+    
+    // Draw new polylines
+    activityRoutes.forEach(route => {
+      if (route.length > 0) {
+        const path = route.map(([lat, lng]) => ({ lat, lng }));
+        const polyline = new window.google.maps.Polyline({
+          path,
+          geodesic: true,
+          strokeColor: '#FF6B35',
+          strokeOpacity: 0.8,
+          strokeWeight: 3,
+          map: mapRef.current,
+        });
+        polylinesRef.current.push(polyline);
+      }
+    });
+    
+    // Fit bounds to show all routes
+    if (activityRoutes.length > 0 && !fittedRef.current) {
+      const bounds = new window.google.maps.LatLngBounds();
+      activityRoutes.forEach(route => {
+        route.forEach(([lat, lng]) => {
+          bounds.extend({ lat, lng });
+        });
+      });
+      mapRef.current.fitBounds(bounds, 50);
+      fittedRef.current = true;
+    }
+  }, [loaded, activityRoutes]);
 
   // Fit both user and slug into view once when both are available
   useEffect(() => {
