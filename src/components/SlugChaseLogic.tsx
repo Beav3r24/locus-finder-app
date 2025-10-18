@@ -29,6 +29,8 @@ const SlugChaseLogic = ({
   const lastUserPosition = useRef<[number, number] | null>(null);
   const lastUpdateTime = useRef<number>(Date.now());
   const coinTimerRef = useRef<number>(0);
+  const gameStartTimeRef = useRef<number>(Date.now());
+  const totalDistanceKmRef = useRef<number>(0);
 
   // Initialize slug position 200 meters away from user
   useEffect(() => {
@@ -57,6 +59,7 @@ const SlugChaseLogic = ({
     if (!lastUserPosition.current) {
       lastUserPosition.current = userPosition;
       lastUpdateTime.current = Date.now();
+      gameStartTimeRef.current = Date.now();
       return;
     }
 
@@ -72,15 +75,22 @@ const SlugChaseLogic = ({
 
     // Filter GPS drift - only count movement > 5 meters
     if (distanceMovedM < 5) {
-      setUserSpeed(0); // Consider as stationary
       lastUpdateTime.current = now;
       return;
     }
 
-    // Calculate speed in km/h
-    const speed = (distanceMovedKm / timeDiff) * 3600;
-    setUserSpeed(speed);
-    onPlayerSpeedUpdate(speed);
+    // Add to total distance
+    totalDistanceKmRef.current += distanceMovedKm;
+
+    // Calculate speed as total distance / total time since game start
+    const totalTimeSeconds = (now - gameStartTimeRef.current) / 1000;
+    const totalTimeHours = totalTimeSeconds / 3600;
+    
+    if (totalTimeHours > 0) {
+      const avgSpeed = totalDistanceKmRef.current / totalTimeHours; // km/h
+      setUserSpeed(avgSpeed);
+      onPlayerSpeedUpdate(avgSpeed);
+    }
 
     // Award coins for movement (1 coin per 10 meters)
     onDistanceUpdate(distanceMovedM);
