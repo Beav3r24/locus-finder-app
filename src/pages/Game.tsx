@@ -12,11 +12,13 @@ import {
 } from '@/components/ui/dialog';
 import Map from '@/components/Map';
 import SlugChaseLogic from '@/components/SlugChaseLogic';
-import { Coins, Target, Trophy, Navigation } from 'lucide-react';
+import { Coins, Target, Trophy, Navigation, Home, User } from 'lucide-react';
 import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 
 
 const Game = () => {
+  const navigate = useNavigate();
   const [userPosition, setUserPosition] = useState<[number, number] | null>(null);
   const [slugPosition, setSlugPosition] = useState<[number, number] | null>(null);
   const [coins, setCoins] = useState(0);
@@ -210,8 +212,8 @@ const Game = () => {
       </div>
 
       {/* Game Over Dialog */}
-      <Dialog open={isGameOver} onOpenChange={setIsGameOver}>
-        <DialogContent className="sm:max-w-md">
+      <Dialog open={isGameOver} onOpenChange={() => {}}>
+        <DialogContent className="sm:max-w-md" onPointerDownOutside={(e) => e.preventDefault()} onEscapeKeyDown={(e) => e.preventDefault()}>
           <DialogHeader>
             <DialogTitle className="text-2xl text-center">💀 Game Over!</DialogTitle>
             <DialogDescription className="text-center text-lg pt-4">
@@ -232,26 +234,29 @@ const Game = () => {
               </div>
             </div>
           </div>
-          <DialogFooter className="sm:justify-center">
+          <DialogFooter className="sm:justify-center gap-2">
             <Button 
-              onClick={() => {
-                setIsGameOver(false);
-                setCoins(0);
-                setDailyDistance(0);
-                setSlugPosition(null);
-                window.location.reload();
-              }}
-              className="w-full"
+              onClick={() => navigate('/')}
+              variant="secondary"
+              className="flex-1"
             >
-              Play Again
+              <Home className="w-4 h-4 mr-2" />
+              Main Menu
+            </Button>
+            <Button 
+              onClick={() => navigate('/profile')}
+              className="flex-1"
+            >
+              <User className="w-4 h-4 mr-2" />
+              Profile
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       {/* Game Won Dialog */}
-      <Dialog open={isGameWon} onOpenChange={setIsGameWon}>
-        <DialogContent className="sm:max-w-md">
+      <Dialog open={isGameWon} onOpenChange={() => {}}>
+        <DialogContent className="sm:max-w-md" onPointerDownOutside={(e) => e.preventDefault()} onEscapeKeyDown={(e) => e.preventDefault()}>
           <DialogHeader>
             <DialogTitle className="text-2xl text-center">🎉 You Won!</DialogTitle>
             <DialogDescription className="text-center text-lg pt-4">
@@ -272,18 +277,21 @@ const Game = () => {
               </div>
             </div>
           </div>
-          <DialogFooter className="sm:justify-center">
+          <DialogFooter className="sm:justify-center gap-2">
             <Button 
-              onClick={() => {
-                setIsGameWon(false);
-                setCoins(0);
-                setDailyDistance(0);
-                setSlugPosition(null);
-                window.location.reload();
-              }}
-              className="w-full"
+              onClick={() => navigate('/')}
+              variant="secondary"
+              className="flex-1"
             >
-              Play Again
+              <Home className="w-4 h-4 mr-2" />
+              Main Menu
+            </Button>
+            <Button 
+              onClick={() => navigate('/profile')}
+              className="flex-1"
+            >
+              <User className="w-4 h-4 mr-2" />
+              Profile
             </Button>
           </DialogFooter>
         </DialogContent>
