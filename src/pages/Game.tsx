@@ -146,6 +146,8 @@ const Game = () => {
       totalRuns: 0,
       longestRun: 0,
       totalCoins: 0,
+      gamesWon: 0,
+      gamesLost: 0,
       lastRunDate: '',
     };
 
@@ -154,6 +156,8 @@ const Game = () => {
       totalRuns: currentStats.totalRuns + 1,
       longestRun: Math.max(currentStats.longestRun, distance),
       totalCoins: currentStats.totalCoins + coinsEarned,
+      gamesWon: currentStats.gamesWon + (won ? 1 : 0),
+      gamesLost: currentStats.gamesLost + (won ? 0 : 1),
       lastRunDate: new Date().toISOString(),
     };
 
@@ -206,6 +210,7 @@ const Game = () => {
           onSlugDistanceUpdate={setSlugDistance}
           onPlayerSpeedUpdate={setPlayerSpeed}
           onSlugSpeedUpdate={setSlugSpeed}
+          isGameActive={!isGameOver && !isGameWon}
         />
       </div>
 

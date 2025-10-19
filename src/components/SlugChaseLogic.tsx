@@ -10,6 +10,7 @@ interface SlugChaseLogicProps {
   onSlugDistanceUpdate: (distance: number) => void;
   onPlayerSpeedUpdate: (speed: number) => void;
   onSlugSpeedUpdate: (speed: number) => void;
+  isGameActive: boolean;
 }
 
 // Maximum realistic running speed: 8.5 m/s (~30.6 km/h)
@@ -24,7 +25,8 @@ const SlugChaseLogic = ({
   onGameOver,
   onSlugDistanceUpdate,
   onPlayerSpeedUpdate,
-  onSlugSpeedUpdate
+  onSlugSpeedUpdate,
+  isGameActive
 }: SlugChaseLogicProps) => {
   const [slugPosition, setSlugPosition] = useState<[number, number] | null>(null);
   const [distanceFromSlug, setDistanceFromSlug] = useState<number>(0);
@@ -127,7 +129,7 @@ const SlugChaseLogic = ({
 
   // Move slug toward user based on calculated speed
   useEffect(() => {
-    if (!userPosition || !slugPosition) return;
+    if (!userPosition || !slugPosition || !isGameActive) return;
 
     const interval = setInterval(() => {
       const from = turf.point([slugPosition[0], slugPosition[1]]);
@@ -162,7 +164,7 @@ const SlugChaseLogic = ({
     }, 1000); // Update every 1 second
 
     return () => clearInterval(interval);
-  }, [userPosition, slugPosition, slugSpeed]);
+  }, [userPosition, slugPosition, slugSpeed, isGameActive]);
 
   // Determine status message
   const getStatusMessage = () => {

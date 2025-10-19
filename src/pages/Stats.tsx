@@ -9,6 +9,8 @@ interface GameStats {
   totalRuns: number;
   longestRun: number;
   totalCoins: number;
+  gamesWon: number;
+  gamesLost: number;
   lastRunDate: string;
 }
 
@@ -18,6 +20,8 @@ const Stats = () => {
     totalRuns: 0,
     longestRun: 0,
     totalCoins: 0,
+    gamesWon: 0,
+    gamesLost: 0,
     lastRunDate: '',
   });
 
@@ -93,7 +97,31 @@ const Stats = () => {
             </CardContent>
           </Card>
 
-          <Card className="col-span-2">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm flex items-center gap-2">
+                <Trophy className="w-4 h-4 text-green-500" />
+                Games Won
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl font-bold">{stats.gamesWon}</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm flex items-center gap-2">
+                <Target className="w-4 h-4 text-red-500" />
+                Games Lost
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-2xl font-bold">{stats.gamesLost}</p>
+            </CardContent>
+          </Card>
+
+          <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm">Average Distance</CardTitle>
             </CardHeader>
