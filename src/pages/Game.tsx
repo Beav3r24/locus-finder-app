@@ -179,7 +179,7 @@ const Game = () => {
           </Card>
           <Card className="flex items-center gap-2 px-3 py-2">
             <Target className="w-4 h-4 text-blue-500" />
-            <span className="text-sm">{dailyDistance.toFixed(0)}m = {(dailyDistance / 1000).toFixed(2)}km / {dailyGoal}m</span>
+            <span className="text-sm">{(dailyDistance / 1000).toFixed(2)}km / {(dailyGoal / 1000).toFixed(2)}km</span>
           </Card>
           <Card className="flex items-center gap-2 px-3 py-2">
             <Trophy className="w-4 h-4 text-purple-500" />
