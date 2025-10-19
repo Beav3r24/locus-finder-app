@@ -276,7 +276,10 @@ const Game = () => {
                 Main Menu
               </Button>
               <Button 
-                onClick={() => navigate('/stats')}
+                onClick={() => {
+                  updateGameStats(dailyDistance, coins, false);
+                  navigate('/stats');
+                }}
                 variant="secondary"
                 className="flex-1"
               >
@@ -328,7 +331,9 @@ const Game = () => {
                 Main Menu
               </Button>
               <Button 
-                onClick={() => navigate('/stats')}
+                onClick={() => {
+                  navigate('/stats');
+                }}
                 variant="secondary"
                 className="flex-1"
               >

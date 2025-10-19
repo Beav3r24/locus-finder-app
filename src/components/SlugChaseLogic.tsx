@@ -88,7 +88,7 @@ const SlugChaseLogic = ({
     }
 
     // Filter small movements (stationary GPS drift)
-    if (distanceMovedM < 1) {
+    if (distanceMovedM < 5) {
       lastUpdateTime.current = now;
       return;
     }
