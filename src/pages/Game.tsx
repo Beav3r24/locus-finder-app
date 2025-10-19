@@ -131,12 +131,34 @@ const Game = () => {
     if (dailyDistance >= dailyGoal && !isGameWon) {
       setIsGameWon(true);
       stopTracking();
+      updateGameStats(dailyDistance, coins, true);
       toast.success('🎉 Goal Reached! You escaped the slug!', {
         description: `You traveled ${(dailyDistance / 1000).toFixed(2)}km and earned ${coins} coins!`,
         duration: 5000,
       });
     }
   }, [dailyDistance, dailyGoal, isGameWon, coins]);
+
+  const updateGameStats = (distance: number, coinsEarned: number, won: boolean) => {
+    const savedStats = localStorage.getItem('gameStats');
+    const currentStats = savedStats ? JSON.parse(savedStats) : {
+      totalDistance: 0,
+      totalRuns: 0,
+      longestRun: 0,
+      totalCoins: 0,
+      lastRunDate: '',
+    };
+
+    const newStats = {
+      totalDistance: currentStats.totalDistance + distance,
+      totalRuns: currentStats.totalRuns + 1,
+      longestRun: Math.max(currentStats.longestRun, distance),
+      totalCoins: currentStats.totalCoins + coinsEarned,
+      lastRunDate: new Date().toISOString(),
+    };
+
+    localStorage.setItem('gameStats', JSON.stringify(newStats));
+  };
 
   const addNotification = (message: string) => {
     setNotifications(prev => {
@@ -236,7 +258,10 @@ const Game = () => {
           </div>
           <DialogFooter className="flex-col gap-2">
             <Button 
-              onClick={() => window.location.reload()}
+              onClick={() => {
+                updateGameStats(dailyDistance, coins, false);
+                window.location.reload();
+              }}
               className="w-full"
             >
               Play Again
@@ -251,12 +276,12 @@ const Game = () => {
                 Main Menu
               </Button>
               <Button 
-                onClick={() => navigate('/profile')}
+                onClick={() => navigate('/stats')}
                 variant="secondary"
                 className="flex-1"
               >
-                <User className="w-4 h-4 mr-2" />
-                Profile
+                <Trophy className="w-4 h-4 mr-2" />
+                Stats
               </Button>
             </div>
           </DialogFooter>
@@ -303,12 +328,12 @@ const Game = () => {
                 Main Menu
               </Button>
               <Button 
-                onClick={() => navigate('/profile')}
+                onClick={() => navigate('/stats')}
                 variant="secondary"
                 className="flex-1"
               >
-                <User className="w-4 h-4 mr-2" />
-                Profile
+                <Trophy className="w-4 h-4 mr-2" />
+                Stats
               </Button>
             </div>
           </DialogFooter>
