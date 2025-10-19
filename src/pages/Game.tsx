@@ -14,7 +14,7 @@ import Map from '@/components/Map';
 import SlugChaseLogic from '@/components/SlugChaseLogic';
 import { Coins, Target, Trophy, Navigation } from 'lucide-react';
 import { toast } from 'sonner';
-import { uploadActivityToStrava } from '@/services/stravaService';
+
 
 const Game = () => {
   const [userPosition, setUserPosition] = useState<[number, number] | null>(null);
@@ -35,7 +35,7 @@ const Game = () => {
   const lastMilestoneRef = useRef<number>(0);
   const notified100m = useRef<boolean>(false);
   const notified10m = useRef<boolean>(false);
-  const gameStartTimeRef = useRef<Date>(new Date());
+  
 
   // Start GPS tracking (works on phone browsers!)
   const startTracking = () => {
@@ -147,26 +147,6 @@ const Game = () => {
     }, 5000);
   };
 
-  const uploadToStrava = async () => {
-    try {
-      const endTime = new Date();
-      const elapsedSeconds = Math.floor((endTime.getTime() - gameStartTimeRef.current.getTime()) / 1000);
-      
-      await uploadActivityToStrava({
-        name: 'Slug Chase Run',
-        type: 'Run',
-        start_date_local: gameStartTimeRef.current.toISOString(),
-        elapsed_time: elapsedSeconds,
-        distance: dailyDistance,
-        description: `Slug Chase game - Earned ${coins} coins and traveled ${(dailyDistance / 1000).toFixed(2)}km before getting caught!`,
-      });
-      
-      toast.success('Activity uploaded to Strava! 🎉');
-    } catch (error) {
-      console.error('Failed to upload to Strava:', error);
-      toast.error('Failed to upload activity to Strava');
-    }
-  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -252,24 +232,16 @@ const Game = () => {
               </div>
             </div>
           </div>
-          <DialogFooter className="sm:justify-center gap-2">
-            <Button 
-              onClick={uploadToStrava}
-              variant="secondary"
-              className="flex-1"
-            >
-              Upload to Strava
-            </Button>
+          <DialogFooter className="sm:justify-center">
             <Button 
               onClick={() => {
                 setIsGameOver(false);
                 setCoins(0);
                 setDailyDistance(0);
                 setSlugPosition(null);
-                gameStartTimeRef.current = new Date();
                 window.location.reload();
               }}
-              className="flex-1"
+              className="w-full"
             >
               Play Again
             </Button>
@@ -300,24 +272,16 @@ const Game = () => {
               </div>
             </div>
           </div>
-          <DialogFooter className="sm:justify-center gap-2">
-            <Button 
-              onClick={uploadToStrava}
-              variant="secondary"
-              className="flex-1"
-            >
-              Upload to Strava
-            </Button>
+          <DialogFooter className="sm:justify-center">
             <Button 
               onClick={() => {
                 setIsGameWon(false);
                 setCoins(0);
                 setDailyDistance(0);
                 setSlugPosition(null);
-                gameStartTimeRef.current = new Date();
                 window.location.reload();
               }}
-              className="flex-1"
+              className="w-full"
             >
               Play Again
             </Button>
