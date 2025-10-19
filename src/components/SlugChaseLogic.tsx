@@ -138,7 +138,7 @@ const SlugChaseLogic = ({
       onSlugDistanceUpdate(distance);
 
       // Don't move slug if already caught user
-      if (distance < 25) {
+      if (distance < 10) {
         console.log('🐌 The slug caught you! Distance:', distance.toFixed(2), 'm');
         onGameOver();
         return;
@@ -166,7 +166,7 @@ const SlugChaseLogic = ({
 
   // Determine status message
   const getStatusMessage = () => {
-    if (distanceFromSlug < 25) return '💀 CAUGHT! Game Over!';
+    if (distanceFromSlug < 10) return '💀 CAUGHT! Game Over!';
     if (distanceFromSlug < 50) return '🚨 DANGER! Run faster!';
     if (distanceFromSlug < 100) return '⚠️ Too close! Speed up!';
     if (userSpeed === 0) return '🐢 Standing still - slug approaching at 20 km/h!';
