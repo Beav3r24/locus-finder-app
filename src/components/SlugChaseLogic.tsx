@@ -31,7 +31,7 @@ const SlugChaseLogic = ({
   const [slugPosition, setSlugPosition] = useState<[number, number] | null>(null);
   const [distanceFromSlug, setDistanceFromSlug] = useState<number>(0);
   const [userSpeed, setUserSpeed] = useState<number>(0); // km/h
-  const [slugSpeed] = useState<number>(20); // km/h constant
+  const [slugSpeed] = useState<number>(10); // km/h constant
   const lastUserPosition = useRef<[number, number] | null>(null);
   const lastUpdateTime = useRef<number>(Date.now());
   const coinTimerRef = useRef<number>(0);
@@ -171,7 +171,7 @@ const SlugChaseLogic = ({
     if (distanceFromSlug < 10) return '💀 CAUGHT! Game Over!';
     if (distanceFromSlug < 50) return '🚨 DANGER! Run faster!';
     if (distanceFromSlug < 100) return '⚠️ Too close! Speed up!';
-    if (userSpeed === 0) return '🐢 Standing still - slug approaching at 20 km/h!';
+    if (userSpeed === 0) return '🐢 Standing still - slug approaching at 10 km/h!';
     if (userSpeed < 4) return '🐢 Too slow! Slug catching up!';
     return '✅ Keep running!';
   };

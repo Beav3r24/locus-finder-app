@@ -9,7 +9,7 @@ const Index = () => {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="text-8xl mb-4">🐌</div>
-          <CardTitle className="text-4xl font-bold mb-2">Immortal Slug Chase</CardTitle>
+          <CardTitle className="text-4xl font-bold mb-2">Run The Slug</CardTitle>
           <p className="text-muted-foreground">Run or be caught by the slug!</p>
         </CardHeader>
         <CardContent className="space-y-3">
