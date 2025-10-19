@@ -23,7 +23,7 @@ const Game = () => {
   const [slugPosition, setSlugPosition] = useState<[number, number] | null>(null);
   const [coins, setCoins] = useState(0);
   const [dailyDistance, setDailyDistance] = useState(0);
-  const [dailyGoal] = useState(2300); // 2.3km daily goal
+  const [dailyGoal] = useState(50); // 50m daily goal
   const [locationError, setLocationError] = useState<string | null>(null);
   const [isTracking, setIsTracking] = useState(false);
   const [accuracy, setAccuracy] = useState<number | null>(null);
