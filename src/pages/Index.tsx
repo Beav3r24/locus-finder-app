@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
-import { Play, User, Trophy } from 'lucide-react';
+import { Play, Trophy } from 'lucide-react';
 
 const Index = () => {
   return (
@@ -17,12 +17,6 @@ const Index = () => {
             <Button className="w-full h-14 text-lg" size="lg">
               <Play className="mr-2" />
               Start Game
-            </Button>
-          </Link>
-          <Link to="/profile" className="block">
-            <Button variant="outline" className="w-full h-12" size="lg">
-              <User className="mr-2" />
-              Profile
             </Button>
           </Link>
           <Link to="/stats" className="block">
