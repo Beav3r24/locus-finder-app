@@ -29,7 +29,7 @@ const SlugChaseLogic = ({
   const [slugPosition, setSlugPosition] = useState<[number, number] | null>(null);
   const [distanceFromSlug, setDistanceFromSlug] = useState<number>(0);
   const [userSpeed, setUserSpeed] = useState<number>(0); // km/h
-  const [slugSpeed, setSlugSpeed] = useState<number>(4.5); // km/h minimum
+  const [slugSpeed] = useState<number>(20); // km/h constant
   const lastUserPosition = useRef<[number, number] | null>(null);
   const lastUpdateTime = useRef<number>(Date.now());
   const coinTimerRef = useRef<number>(0);
@@ -120,19 +120,10 @@ const SlugChaseLogic = ({
     lastUpdateTime.current = now;
   }, [userPosition]);
 
-  // Dynamic slug speed based on user speed
+  // Update slug speed callback
   useEffect(() => {
-    let newSpeed;
-    if (userSpeed > 6) {
-      // If user is fast, slug speeds up to 75% of user speed
-      newSpeed = userSpeed * 0.75;
-    } else {
-      // Minimum slug speed is 4.5 km/h
-      newSpeed = 4.5;
-    }
-    setSlugSpeed(newSpeed);
-    onSlugSpeedUpdate(newSpeed);
-  }, [userSpeed]);
+    onSlugSpeedUpdate(slugSpeed);
+  }, []);
 
   // Move slug toward user based on calculated speed
   useEffect(() => {
@@ -147,7 +138,7 @@ const SlugChaseLogic = ({
       onSlugDistanceUpdate(distance);
 
       // Don't move slug if already caught user
-      if (distance < 3) {
+      if (distance < 25) {
         console.log('🐌 The slug caught you! Distance:', distance.toFixed(2), 'm');
         onGameOver();
         return;
@@ -175,13 +166,12 @@ const SlugChaseLogic = ({
 
   // Determine status message
   const getStatusMessage = () => {
-    if (distanceFromSlug < 3) return '💀 CAUGHT! Game Over!';
-    if (distanceFromSlug < 20) return '🚨 DANGER! Run faster!';
-    if (distanceFromSlug < 50) return '⚠️ Too close! Speed up!';
-    if (userSpeed === 0) return '🐢 Standing still - slug approaching at 5 km/h!';
+    if (distanceFromSlug < 25) return '💀 CAUGHT! Game Over!';
+    if (distanceFromSlug < 50) return '🚨 DANGER! Run faster!';
+    if (distanceFromSlug < 100) return '⚠️ Too close! Speed up!';
+    if (userSpeed === 0) return '🐢 Standing still - slug approaching at 20 km/h!';
     if (userSpeed < 4) return '🐢 Too slow! Slug catching up!';
-    if (userSpeed > 10) return '🏃‍♂️ Too fast! Slug speeding up!';
-    return '✅ Perfect pace!';
+    return '✅ Keep running!';
   };
 
   return (
