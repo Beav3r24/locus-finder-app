@@ -213,7 +213,7 @@ const Game = () => {
 
       {/* Game Over Dialog */}
       <Dialog open={isGameOver} onOpenChange={() => {}}>
-        <DialogContent className="sm:max-w-md" onPointerDownOutside={(e) => e.preventDefault()} onEscapeKeyDown={(e) => e.preventDefault()}>
+        <DialogContent className="sm:max-w-md [&>button]:hidden" onPointerDownOutside={(e) => e.preventDefault()} onEscapeKeyDown={(e) => e.preventDefault()}>
           <DialogHeader>
             <DialogTitle className="text-2xl text-center">💀 Game Over!</DialogTitle>
             <DialogDescription className="text-center text-lg pt-4">
@@ -234,29 +234,38 @@ const Game = () => {
               </div>
             </div>
           </div>
-          <DialogFooter className="sm:justify-center gap-2">
+          <DialogFooter className="flex-col gap-2">
             <Button 
-              onClick={() => navigate('/')}
-              variant="secondary"
-              className="flex-1"
+              onClick={() => window.location.reload()}
+              className="w-full"
             >
-              <Home className="w-4 h-4 mr-2" />
-              Main Menu
+              Play Again
             </Button>
-            <Button 
-              onClick={() => navigate('/profile')}
-              className="flex-1"
-            >
-              <User className="w-4 h-4 mr-2" />
-              Profile
-            </Button>
+            <div className="flex gap-2 w-full">
+              <Button 
+                onClick={() => navigate('/')}
+                variant="secondary"
+                className="flex-1"
+              >
+                <Home className="w-4 h-4 mr-2" />
+                Main Menu
+              </Button>
+              <Button 
+                onClick={() => navigate('/profile')}
+                variant="secondary"
+                className="flex-1"
+              >
+                <User className="w-4 h-4 mr-2" />
+                Profile
+              </Button>
+            </div>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       {/* Game Won Dialog */}
       <Dialog open={isGameWon} onOpenChange={() => {}}>
-        <DialogContent className="sm:max-w-md" onPointerDownOutside={(e) => e.preventDefault()} onEscapeKeyDown={(e) => e.preventDefault()}>
+        <DialogContent className="sm:max-w-md [&>button]:hidden" onPointerDownOutside={(e) => e.preventDefault()} onEscapeKeyDown={(e) => e.preventDefault()}>
           <DialogHeader>
             <DialogTitle className="text-2xl text-center">🎉 You Won!</DialogTitle>
             <DialogDescription className="text-center text-lg pt-4">
@@ -277,22 +286,31 @@ const Game = () => {
               </div>
             </div>
           </div>
-          <DialogFooter className="sm:justify-center gap-2">
+          <DialogFooter className="flex-col gap-2">
             <Button 
-              onClick={() => navigate('/')}
-              variant="secondary"
-              className="flex-1"
+              onClick={() => window.location.reload()}
+              className="w-full"
             >
-              <Home className="w-4 h-4 mr-2" />
-              Main Menu
+              Play Again
             </Button>
-            <Button 
-              onClick={() => navigate('/profile')}
-              className="flex-1"
-            >
-              <User className="w-4 h-4 mr-2" />
-              Profile
-            </Button>
+            <div className="flex gap-2 w-full">
+              <Button 
+                onClick={() => navigate('/')}
+                variant="secondary"
+                className="flex-1"
+              >
+                <Home className="w-4 h-4 mr-2" />
+                Main Menu
+              </Button>
+              <Button 
+                onClick={() => navigate('/profile')}
+                variant="secondary"
+                className="flex-1"
+              >
+                <User className="w-4 h-4 mr-2" />
+                Profile
+              </Button>
+            </div>
           </DialogFooter>
         </DialogContent>
       </Dialog>
